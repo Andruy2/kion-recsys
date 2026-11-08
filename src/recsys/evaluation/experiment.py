@@ -14,5 +14,5 @@ def evaluate(recs, truth):
 
 
 def log_result(results, model, params, fold, metrics):
-    """Добавляет строку эксперимента в список results."""
-    results.append({"model": model, "params": str(params), "fold": fold, **metrics})
+    """Добавляет строку эксперимента: модель, фолд, параметры и метрики — каждое в своей колонке."""
+    results.append({"model": model, "fold": fold, **params, **metrics})
