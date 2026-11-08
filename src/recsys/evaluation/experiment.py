@@ -25,3 +25,10 @@ def prepare_fold(train, val):
     return {"train": train, "dataset": Dataset.construct(to_rectools(train)),
             "warm_users": warm_users, "truth": truth}
 
+def run_model(results, name, params, make_model, fold, fold_name, k=10):
+    """Обучает новую модель на фолде, считает метрики и пишет их в журнал."""
+    model = make_model()
+    model.fit(fold["dataset"])
+    recs = model.recommend(users=fold["warm_users"], dataset=fold["dataset"], k=k, filter_viewed=True)
+    log_result(results, name, params, fold_name, evaluate(recs, fold["truth"]))
+    return recs
