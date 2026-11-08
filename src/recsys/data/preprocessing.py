@@ -19,3 +19,9 @@ def time_split(df, n_days=7):
     before = df[df["last_watch_dt"] <= split_dt].reset_index(drop=True)
     after = df[df["last_watch_dt"] > split_dt].reset_index(drop=True)
     return before, after
+
+def to_rectools(df, weight_col=None):
+    """Переводит наш формат во входной формат RecTools."""
+    out = df[["user_id", "item_id", "last_watch_dt"]].rename(columns={"last_watch_dt": "datetime"})
+    out["weight"] = 1.0 if weight_col is None else df[weight_col].values
+    return out
