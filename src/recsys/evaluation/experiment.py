@@ -1,4 +1,4 @@
-from pandas import pd
+import pandas as pd
 import os
 from recsys.evaluation.metrics import build_eval
 from rectools.dataset import Dataset
