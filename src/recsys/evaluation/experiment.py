@@ -1,3 +1,5 @@
+from pandas import pd
+import os
 from recsys.evaluation.metrics import build_eval
 from rectools.dataset import Dataset
 from rectools.metrics import MAP, NDCG, Recall, calc_metrics
@@ -16,19 +18,22 @@ def evaluate(recs, truth):
     return calc_metrics(METRICS, reco=recs, interactions=truth[["user_id", "item_id"]])
 
 
-def log_result(results, model, params, fold, metrics):
-    """Добавляет строку эксперимента: модель, фолд, параметры и метрики — каждое в своей колонке."""
-    results.append({"model": model, "fold": fold, **params, **metrics})
+def log_result(results, model, params, fold, metrics, path=None):
+    """Добавляет строку в журнал и, если указан path, сразу дописывает её в CSV."""
+    row = {"model": model, "fold": fold, **params, **metrics}
+    results.append(row)
+    if path is not None:
+        pd.DataFrame([row]).to_csv(path, mode="a", header=not os.path.exists(path), index=False)
 
 def prepare_fold(train, val):
     warm_users, truth = build_eval(train, val)
     return {"train": train, "dataset": Dataset.construct(to_rectools(train)),
             "warm_users": warm_users, "truth": truth}
 
-def run_model(results, name, params, make_model, fold, fold_name, k=10):
+def run_model(results, name, params, make_model, fold, fold_name, k=10, path=None):
     """Обучает новую модель на фолде, считает метрики и пишет их в журнал."""
     model = make_model()
     model.fit(fold["dataset"])
     recs = model.recommend(users=fold["warm_users"], dataset=fold["dataset"], k=k, filter_viewed=True)
-    log_result(results, name, params, fold_name, evaluate(recs, fold["truth"]))
+    log_result(results, name, params, fold_name, evaluate(recs, fold["truth"]), path)
     return recs
