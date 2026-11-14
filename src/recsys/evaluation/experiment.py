@@ -3,7 +3,7 @@ import os
 from recsys.evaluation.metrics import build_eval
 from rectools.dataset import Dataset
 from rectools.metrics import MAP, NDCG, Recall, calc_metrics
-from recsys.data.preprocessing import to_rectools
+from recsys.data.preprocessing import shuffle_within_day, to_rectools
 
 METRICS = {
     "recall@10": Recall(k=10),
@@ -25,9 +25,11 @@ def log_result(results, model, params, fold, metrics, path=None):
     if path is not None:
         pd.DataFrame([row]).to_csv(path, mode="a", header=not os.path.exists(path), index=False)
 
-def prepare_fold(train, val):
+def prepare_fold(train, val, shuffle_seed=None):
+    """Всё, что нужно для оценки на одном фолде."""
     warm_users, truth = build_eval(train, val)
-    return {"train": train, "dataset": Dataset.construct(to_rectools(train)),
+    train_for_model = train if shuffle_seed is None else shuffle_within_day(train, shuffle_seed)
+    return {"train": train, "dataset": Dataset.construct(to_rectools(train_for_model)),
             "warm_users": warm_users, "truth": truth}
 
 def run_model(results, name, params, make_model, fold, fold_name, k=10, path=None):

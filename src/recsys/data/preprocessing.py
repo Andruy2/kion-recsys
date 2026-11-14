@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 def preprocess_interactions(interactions, min_dur=300, max_dur=None):
     """Удаляет аномалии по total_dur и оставляет позитивные взаимодействия."""
@@ -24,4 +24,12 @@ def to_rectools(df, weight_col=None):
     """Переводит наш формат во входной формат RecTools."""
     out = df[["user_id", "item_id", "last_watch_dt"]].rename(columns={"last_watch_dt": "datetime"})
     out["weight"] = 1.0 if weight_col is None else df[weight_col].values
+    return out
+
+def shuffle_within_day(df, seed=42):
+    """Случайный, но воспроизводимый порядок взаимодействий внутри одного дня."""
+    rng = np.random.default_rng(seed)
+    out = df.copy()
+    seconds = rng.integers(0, 24 * 3600, size=len(out))
+    out["last_watch_dt"] = out["last_watch_dt"] + pd.to_timedelta(seconds, unit="s")
     return out
