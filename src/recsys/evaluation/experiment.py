@@ -36,6 +36,6 @@ def run_model(results, name, params, make_model, fold, fold_name, k=10, path=Non
     """Обучает новую модель на фолде, считает метрики и пишет их в журнал."""
     model = make_model()
     model.fit(fold["dataset"])
-    recs = model.recommend(users=fold["warm_users"], dataset=fold["dataset"], k=k, filter_viewed=True)
+    recs = model.recommend(users=fold["warm_users"], dataset=fold["dataset"], k=k, filter_viewed=True, on_unsupported_targets="warn")
     log_result(results, name, params, fold_name, evaluate(recs, fold["truth"]), path)
     return recs
