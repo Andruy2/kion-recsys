@@ -3,7 +3,7 @@ import os
 from recsys.evaluation.metrics import build_eval
 from rectools.dataset import Dataset
 from rectools.metrics import MAP, NDCG, Recall, calc_metrics
-from recsys.data.preprocessing import shuffle_within_day, to_rectools
+from recsys.data.preprocessing import add_time_decay, shuffle_within_day, to_rectools
 
 METRICS = {
     "recall@10": Recall(k=10),
@@ -39,3 +39,14 @@ def run_model(results, name, params, make_model, fold, fold_name, k=10, path=Non
     recs = model.recommend(users=fold["warm_users"], dataset=fold["dataset"], k=k, filter_viewed=True, on_unsupported_targets="warn")
     log_result(results, name, params, fold_name, evaluate(recs, fold["truth"]), path)
     return recs
+
+def prepare_fold(train, val, shuffle_seed=None, half_life=None):
+    """Всё, что нужно для оценки на одном фолде."""
+    warm_users, truth = build_eval(train, val)
+    data = train if shuffle_seed is None else shuffle_within_day(train, shuffle_seed)
+    if half_life is None:
+        rt = to_rectools(data)
+    else:
+        rt = to_rectools(add_time_decay(data, half_life), weight_col="decay_weight")
+    return {"train": train, "dataset": Dataset.construct(rt),
+            "warm_users": warm_users, "truth": truth}

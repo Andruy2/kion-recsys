@@ -33,3 +33,10 @@ def shuffle_within_day(df, seed=42):
     seconds = rng.integers(0, 24 * 3600, size=len(out))
     out["last_watch_dt"] = out["last_watch_dt"] + pd.to_timedelta(seconds, unit="s")
     return out
+
+def add_time_decay(df, half_life, col="decay_weight"):
+    """Вес взаимодействия, убывающий с его возрастом относительно последней даты в df."""
+    out = df.copy()
+    age_days = (out["last_watch_dt"].max() - out["last_watch_dt"]).dt.days
+    out[col] = 0.5 ** (age_days / half_life)
+    return out
