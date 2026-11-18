@@ -12,6 +12,7 @@ def make_sasrec(n_factors=64, n_blocks=2, n_heads=4, dropout_rate=0.2, session_m
         n_heads=n_heads,
         dropout_rate=dropout_rate,
         session_max_len=session_max_len,
+        verbose=0,
         loss=loss,
         n_negatives=n_negatives,
         lr=lr,
