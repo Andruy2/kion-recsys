@@ -20,6 +20,5 @@ def make_sasrec(n_factors=64, n_blocks=2, n_heads=4, dropout_rate=0.2, session_m
         epochs=epochs,
         deterministic=True,
         item_net_block_types=(IdEmbeddingsItemNet,),
-        verbose=1,
         dataloader_num_workers=dataloader_num_workers
     )
