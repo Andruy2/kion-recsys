@@ -23,7 +23,7 @@ def log_result(results, model, params, fold, metrics, path=None):
     row = {"model": model, "fold": fold, **params, **metrics}
     results.append(row)
     if path is not None:
-        pd.DataFrame([row]).to_csv(path, mode="a", header=not os.path.exists(path), index=False)
+        pd.DataFrame(results).to_csv(path, index=False)
 
 def prepare_fold(train, val, shuffle_seed=None):
     """Всё, что нужно для оценки на одном фолде."""
