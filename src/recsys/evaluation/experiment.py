@@ -4,6 +4,7 @@ from recsys.evaluation.metrics import build_eval
 from rectools.dataset import Dataset
 from rectools.metrics import MAP, NDCG, Recall, calc_metrics
 from recsys.data.preprocessing import add_time_decay, shuffle_within_day, to_rectools
+import gc
 
 METRICS = {
     "recall@10": Recall(k=10),
@@ -36,8 +37,11 @@ def run_model(results, name, params, make_model, fold, fold_name, k=10, path=Non
     """Обучает новую модель на фолде, считает метрики и пишет их в журнал."""
     model = make_model()
     model.fit(fold["dataset"])
-    recs = model.recommend(users=fold["warm_users"], dataset=fold["dataset"], k=k, filter_viewed=True, on_unsupported_targets="warn")
-    log_result(results, name, params, fold_name, evaluate(recs, fold["truth"]), path)
+    recs = model.recommend(users=fold["warm_users"], dataset=fold["dataset"], k=k,
+                           filter_viewed=True, on_unsupported_targets="warn")
+    log_result(results, name, params, fold_name, evaluate(recs, fold["truth"]), path=path)
+    del model
+    gc.collect()
     return recs
 
 def prepare_fold(train, val, shuffle_seed=None, half_life=None):
